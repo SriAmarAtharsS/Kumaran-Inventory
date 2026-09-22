@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="ta" class="h-full bg-slate-100">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#047857">
     <title>ஸ்ரீ குமரன் மளிகைக் கடை</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -13,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK (Modular Compatibility Scripts) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -21,6 +26,12 @@
         body {
             font-family: 'Mukta Malar', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        input, select, textarea {
+            user-select: text;
+            -webkit-user-select: text;
         }
         .no-scrollbar::-webkit-scrollbar {
             display: none;
@@ -31,18 +42,18 @@
         }
     </style>
 </head>
-<body class="bg-emerald-50/50 text-slate-800 min-h-screen pb-24">
+<body class="bg-slate-100 text-slate-800 min-h-full pb-28 pt-safe">
 
-    <!-- Header Bar -->
+    <!-- Sticky Mobile Top Bar -->
     <header class="bg-emerald-700 text-white sticky top-0 z-30 shadow-md">
         <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-amber-400 text-emerald-900 w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow">
+            <div class="flex items-center gap-2.5">
+                <div class="bg-amber-400 text-emerald-900 w-9 h-9 rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
                     <i class="fa-solid fa-store"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold leading-tight">ஸ்ரீ குமரன் மளிகைக் கடை</h1>
-                    <div class="flex items-center gap-1.5 mt-0.5">
+                    <h1 class="text-base font-bold leading-tight tracking-tight">ஸ்ரீ குமரன் மளிகைக் கடை</h1>
+                    <div class="flex items-center gap-1 mt-0.5">
                         <span id="syncBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">
                             <span class="w-1.5 h-1.5 mr-1 rounded-full bg-amber-500 animate-pulse"></span>
                             இணைக்கப்படுகிறது...
@@ -51,79 +62,93 @@
                 </div>
             </div>
             <div class="flex items-center gap-1">
-                <button onclick="openCategoryModal()" title="பிரிவு மேலாண்மை" class="text-emerald-100 hover:text-white p-2 text-xs bg-emerald-800/60 rounded-lg flex items-center gap-1">
+                <button onclick="openCategoryModal()" title="பிரிவு மேலாண்மை" class="text-emerald-100 active:bg-emerald-800 p-2 text-xs bg-emerald-800/70 rounded-lg flex items-center gap-1.5">
                     <i class="fa-solid fa-tags"></i>
-                    <span>பிரிவுகள்</span>
+                    <span class="font-medium">பிரிவுகள்</span>
                 </button>
-                <button onclick="openShopKeyModal()" title="கடை அமைப்புகள்" class="text-emerald-100 hover:text-white p-2 text-xs bg-emerald-800/60 rounded-lg">
+                <button onclick="openShopKeyModal()" title="கடை அமைப்புகள்" class="text-emerald-100 active:bg-emerald-800 p-2 text-xs bg-emerald-800/70 rounded-lg">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-md mx-auto px-4 pt-3">
+    <main class="max-w-md mx-auto px-3.5 pt-3">
 
-        <!-- Active Shop Connected Info -->
-        <div class="bg-emerald-100/70 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs flex items-center justify-between mb-3">
+        <!-- Active Shop Connected Info Banner -->
+        <div class="bg-emerald-100/80 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-xl text-xs flex items-center justify-between mb-3 shadow-sm">
             <div class="flex items-center gap-1.5">
-                <i class="fa-solid fa-cloud text-emerald-600"></i>
-                <span>கடை குறியீடு: <strong id="currentShopDisplay" class="font-bold">...</strong></span>
+                <i class="fa-solid fa-wifi text-emerald-600"></i>
+                <span>கடை குறியீடு: <strong id="currentShopDisplay" class="font-bold tracking-wide">...</strong></span>
             </div>
-            <button onclick="openShopKeyModal()" class="text-emerald-700 font-bold underline text-[11px]">மாற்ற</button>
+            <button onclick="openShopKeyModal()" class="text-emerald-700 font-bold underline text-[11px] p-1">மாற்ற</button>
         </div>
 
         <!-- Dashboard Summary Filter Cards -->
         <div class="grid grid-cols-3 gap-2 mb-3">
             <button onclick="setStockFilter('all')" id="card-filter-all" class="bg-white p-2.5 rounded-xl border-2 border-emerald-500 shadow-sm text-left active:scale-95 transition-transform">
-                <div class="text-emerald-600 font-semibold text-xs">மொத்த பொருட்கள்</div>
-                <div class="text-xl font-bold text-slate-800" id="stat-total">0</div>
+                <div class="text-emerald-600 font-semibold text-[11px]">மொத்த பொருட்கள்</div>
+                <div class="text-lg font-bold text-slate-800" id="stat-total">0</div>
                 <div class="text-[10px] text-slate-500">அனைத்தும்</div>
             </button>
 
-            <button onclick="setStockFilter('in_stock')" id="card-filter-instock" class="bg-white p-2.5 rounded-xl border border-emerald-100 shadow-sm text-left active:scale-95 transition-transform">
-                <div class="text-emerald-700 font-semibold text-xs flex items-center justify-between">
+            <button onclick="setStockFilter('in_stock')" id="card-filter-instock" class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm text-left active:scale-95 transition-transform">
+                <div class="text-emerald-700 font-semibold text-[11px] flex items-center justify-between">
                     <span>இருப்பில் உள்ளது</span>
                     <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]"></i>
                 </div>
-                <div class="text-xl font-bold text-emerald-700" id="stat-instock">0</div>
+                <div class="text-lg font-bold text-emerald-700" id="stat-instock">0</div>
                 <div class="text-[10px] text-emerald-600">கிடைப்பவை</div>
             </button>
 
-            <button onclick="setStockFilter('out_of_stock')" id="card-filter-outstock" class="bg-white p-2.5 rounded-xl border border-emerald-100 shadow-sm text-left active:scale-95 transition-transform">
-                <div class="text-rose-600 font-semibold text-xs flex items-center justify-between">
+            <button onclick="setStockFilter('out_of_stock')" id="card-filter-outstock" class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm text-left active:scale-95 transition-transform">
+                <div class="text-rose-600 font-semibold text-[11px] flex items-center justify-between">
                     <span>இருப்பில் இல்லை</span>
                     <i class="fa-solid fa-circle-exclamation text-rose-500 text-[10px]"></i>
                 </div>
-                <div class="text-xl font-bold text-rose-600" id="stat-outstock">0</div>
+                <div class="text-lg font-bold text-rose-600" id="stat-outstock">0</div>
                 <div class="text-[10px] text-rose-500">தீர்ந்தவை</div>
             </button>
         </div>
 
-        <!-- Search Bar -->
-        <div class="relative mb-3">
-            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="பொருளின் பெயரைத் தேட..." 
-                class="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm text-sm">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-            <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-1">
-                <i class="fa-solid fa-circle-xmark text-sm"></i>
-            </button>
+        <!-- Mobile Search Bar & View Switcher -->
+        <div class="flex gap-2 mb-3">
+            <div class="relative flex-1">
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="பொருளின் பெயரைத் தேட..." 
+                    class="w-full pl-9 pr-9 py-2 bg-white rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm text-sm">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-2.5 top-2 text-slate-400 p-1">
+                    <i class="fa-solid fa-circle-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- View Toggle Switcher (Card vs List) -->
+            <div class="bg-white border border-slate-300 p-1 rounded-xl flex items-center gap-1 shadow-sm shrink-0">
+                <button id="btn-view-card" onclick="setViewMode('card')" title="கார்டு பார்வை (Card View)" class="p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span class="text-[11px] hidden xs:inline">கார்டு</span>
+                </button>
+                <button id="btn-view-list" onclick="setViewMode('list')" title="பட்டியல் பார்வை (List View)" class="p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all">
+                    <i class="fa-solid fa-list-ul"></i>
+                    <span class="text-[11px] hidden xs:inline">பட்டியல்</span>
+                </button>
+            </div>
         </div>
 
         <!-- Category Horizontal Filter Bar -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-2 text-xs" id="categoryChips">
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 mb-1 text-xs" id="categoryChips">
             <!-- Dynamic Category Chips -->
         </div>
 
         <!-- Filter Active Banner -->
         <div id="filterNotice" class="hidden mb-3 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg text-xs flex items-center justify-between">
             <span id="filterNoticeText">காட்டப்படுகிறது: இருப்பில் இல்லாத பொருட்கள் மட்டும்</span>
-            <button onclick="setStockFilter('all')" class="underline font-bold text-amber-900 ml-2">அனைத்தையும் காட்டு</button>
+            <button onclick="setStockFilter('all')" class="underline font-bold text-amber-900 ml-2 p-1">அனைத்தும்</button>
         </div>
 
         <!-- Item List Container -->
         <div id="itemList" class="space-y-2.5">
-            <!-- Rendered via JS -->
+            <!-- Dynamic Items Rendered Here -->
         </div>
 
         <!-- Empty State -->
@@ -132,14 +157,14 @@
                 <i class="fa-solid fa-basket-shopping"></i>
             </div>
             <p class="text-slate-600 font-semibold" id="emptyStateMessage">பொருட்கள் எதுவும் கிடைக்கவில்லை!</p>
-            <p class="text-slate-400 text-xs mt-1">புதிய பொருளை சேர்க்க கீழே உள்ள '+' பொத்தானை அழுத்தவும்.</p>
+            <p class="text-slate-400 text-xs mt-1">புதிய பொருளை சேர்க்க '+' பொத்தானை அழுத்தவும்.</p>
         </div>
 
     </main>
 
-    <!-- FAB Button (Add Item) -->
-    <div class="fixed bottom-5 right-5 z-20">
-        <button onclick="openModal('add')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold w-14 h-14 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform">
+    <!-- Mobile Floating Action Button (FAB) -->
+    <div class="fixed bottom-6 right-5 z-20">
+        <button onclick="openModal('add')" class="bg-emerald-600 active:bg-emerald-700 text-white font-bold w-14 h-14 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform border-2 border-white">
             <i class="fa-solid fa-plus text-2xl"></i>
         </button>
     </div>
@@ -149,13 +174,13 @@
         <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
             
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h2 id="modalTitle" class="text-lg font-bold text-slate-800">புதிய பொருள் சேர்க்க</h2>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                <h2 id="modalTitle" class="text-base font-bold text-slate-800">புதிய பொருள் சேர்க்க</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 -mr-2">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
 
-            <form id="itemForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <form id="itemForm" onsubmit="handleFormSubmit(event)" class="space-y-3.5">
                 <input type="hidden" id="itemId">
 
                 <div>
@@ -167,7 +192,7 @@
                 <div>
                     <div class="flex justify-between items-center mb-1">
                         <label class="block text-xs font-semibold text-slate-700">பிரிவு (Category) *</label>
-                        <button type="button" onclick="openCategoryModal()" class="text-emerald-700 text-[11px] font-bold hover:underline">+ புதிய பிரிவு</button>
+                        <button type="button" onclick="openCategoryModal()" class="text-emerald-700 text-[11px] font-bold underline">+ புதிய பிரிவு</button>
                     </div>
                     <select id="itemCategory" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <!-- Dynamic categories -->
@@ -196,7 +221,7 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <label class="flex items-center justify-between cursor-pointer">
                         <span class="text-xs font-semibold text-slate-700">இருப்பு நிலை (Stock Status)</span>
                         <div class="relative inline-flex items-center">
@@ -208,10 +233,10 @@
                 </div>
 
                 <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeModal()" class="flex-1 py-2.5 border border-slate-300 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-50">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2.5 border border-slate-300 rounded-xl text-slate-600 font-semibold text-sm active:bg-slate-100">
                         ரத்து
                     </button>
-                    <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 shadow-md">
+                    <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm active:bg-emerald-700 shadow-md">
                         சேமிக்கவும்
                     </button>
                 </div>
@@ -223,8 +248,8 @@
     <div id="categoryModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h2 class="text-lg font-bold text-slate-800">பிரிவுகள் மேலாண்மை (Categories)</h2>
-                <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                <h2 class="text-base font-bold text-slate-800">பிரிவுகள் மேலாண்மை (Categories)</h2>
+                <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-600 p-2 -mr-2">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -235,10 +260,10 @@
                 <div class="flex gap-2">
                     <input type="text" id="catNameInput" required placeholder="புதிய பிரிவு பெயர்..." 
                         class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <button type="submit" id="catSubmitBtn" class="px-4 py-2 bg-emerald-600 text-white font-semibold text-sm rounded-lg hover:bg-emerald-700">
+                    <button type="submit" id="catSubmitBtn" class="px-4 py-2 bg-emerald-600 text-white font-semibold text-xs rounded-lg active:bg-emerald-700">
                         சேர்க்க
                     </button>
-                    <button type="button" id="catCancelEditBtn" onclick="cancelCatEdit()" class="hidden px-3 py-2 bg-slate-200 text-slate-600 font-semibold text-sm rounded-lg">
+                    <button type="button" id="catCancelEditBtn" onclick="cancelCatEdit()" class="hidden px-3 py-2 bg-slate-200 text-slate-600 font-semibold text-xs rounded-lg">
                         ரத்து
                     </button>
                 </div>
@@ -246,7 +271,7 @@
 
             <!-- Current Categories List -->
             <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="categoryManageList">
-                <!-- List dynamically generated -->
+                <!-- Dynamic categories -->
             </div>
         </div>
     </div>
@@ -254,10 +279,10 @@
     <!-- Modal 3: Shop Key / Passcode Sync Setup Modal -->
     <div id="shopKeyModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl">
-            <h2 class="text-lg font-bold text-slate-800 mb-2"><i class="fa-solid fa-key text-emerald-600 mr-2"></i>கடை இணைப்பு (Shop Sync)</h2>
-            <p class="text-xs text-slate-600 mb-4">உங்கள் கடையின் ரகசியக் குறியீட்டை (Shop Passcode) உள்ளிடவும். அனைத்து போன்களிலும் இதே குறியீட்டைப் பயன்படுத்தி நேரடி ஒத்திசைவு (Realtime Sync) பெறலாம்.</p>
+            <h2 class="text-base font-bold text-slate-800 mb-1.5"><i class="fa-solid fa-key text-emerald-600 mr-2"></i>கடை இணைப்பு (Shop Sync)</h2>
+            <p class="text-xs text-slate-600 mb-3.5">அனைத்து போன்களிலும் இதே குறியீட்டைப் (Shop Code) பயன்படுத்தி நேரடி ஒத்திசைவு (Realtime Sync) பெறலாம்.</p>
             
-            <form onsubmit="handleShopKeySubmit(event)" class="space-y-4">
+            <form onsubmit="handleShopKeySubmit(event)" class="space-y-3.5">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">கடை குறியீடு (Shop Code)</label>
                     <input type="text" id="shopKeyInput" required placeholder="எ.கா. kumaran123" 
@@ -268,7 +293,7 @@
                     <button type="button" onclick="closeShopKeyModal()" class="flex-1 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold text-xs">
                         ரத்து
                     </button>
-                    <button type="submit" class="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-semibold text-xs hover:bg-emerald-700">
+                    <button type="submit" class="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-semibold text-xs active:bg-emerald-700">
                         இணைக்கவும்
                     </button>
                 </div>
@@ -278,9 +303,7 @@
 
     <!-- Application Script Logic -->
     <script>
-        // =============================================================
-        // REPLACE THIS BLOCK WITH YOUR KEYS FROM FIREBASE CONSOLE
-        // =============================================================
+        // Corrected Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDE07vmIKN_D541BB75NoYQdvdoJH_RxZQ",
             authDomain: "kumaran-inventory.firebaseapp.com",
@@ -291,7 +314,6 @@
             appId: "1:466318188331:web:ac3979a4f03c4bc2e1ef6e",
             measurementId: "G-EGHXTQLQM6"
         };
-        // =============================================================
 
         // Initialize Firebase
         if (!firebase.apps.length) {
@@ -299,10 +321,9 @@
         }
         const db = firebase.database();
 
-        // -------------------------------------------------------------
-        // GLOBAL STATE & DEFAULT DATA
-        // -------------------------------------------------------------
+        // Application State
         let shopKey = localStorage.getItem('sri_kumaran_shop_key') || 'KUMARAN_MAIN';
+        let viewMode = localStorage.getItem('sri_kumaran_view_mode') || 'card'; // 'card' or 'list'
         let items = [];
         let categories = [
             'தானியங்கள் & அரிசி',
@@ -319,20 +340,16 @@
         let activeCategory = 'all';
         let stockFilter = 'all';
         let searchQuery = '';
-        let isOnline = false;
 
-        // Default initial items if cloud DB is clean
         const DEFAULT_ITEMS = [
             { id: '1', name: 'பொன்னி அரிசி (Ponni Rice)', category: 'தானியங்கள் & அரிசி', price: 58.00, unit: '1 கி.கி (1 kg)', inStock: true, createdAt: '22/09/2026, 09:30 AM', updatedAt: '22/09/2026, 09:30 AM' },
             { id: '2', name: 'துவரம் பருப்பு (Toor Dal)', category: 'பருப்பு வகைகள்', price: 150.00, unit: '1 கி.கி (1 kg)', inStock: true, createdAt: '22/09/2026, 10:00 AM', updatedAt: '22/09/2026, 10:00 AM' },
             { id: '3', name: 'நல்லெண்ணெய் (Sesame Oil)', category: 'எண்ணெய் & நெய்', price: 240.00, unit: '1 லிட்டர் (1 L)', inStock: false, createdAt: '21/09/2026, 04:15 PM', updatedAt: '22/09/2026, 08:00 AM' }
         ];
 
-        // -------------------------------------------------------------
-        // APP INITIALIZATION & FIREBASE REALTIME LISTENERS
-        // -------------------------------------------------------------
         document.addEventListener('DOMContentLoaded', () => {
             updateShopDisplay();
+            updateViewButtons();
             initFirebaseListeners();
 
             document.getElementById('itemInStock').addEventListener('change', (e) => {
@@ -344,23 +361,39 @@
             document.getElementById('currentShopDisplay').textContent = shopKey;
         }
 
+        function setViewMode(mode) {
+            viewMode = mode;
+            localStorage.setItem('sri_kumaran_view_mode', mode);
+            updateViewButtons();
+            renderItems();
+        }
+
+        function updateViewButtons() {
+            const btnCard = document.getElementById('btn-view-card');
+            const btnList = document.getElementById('btn-view-list');
+
+            if (viewMode === 'card') {
+                btnCard.className = 'p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-emerald-700 text-white shadow-sm';
+                btnList.className = 'p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 text-slate-500 hover:text-slate-800';
+            } else {
+                btnList.className = 'p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-emerald-700 text-white shadow-sm';
+                btnCard.className = 'p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 text-slate-500 hover:text-slate-800';
+            }
+        }
+
         function initFirebaseListeners() {
             const badge = document.getElementById('syncBadge');
 
-            // Connection Status Monitor
             db.ref('.info/connected').on('value', (snap) => {
                 if (snap.val() === true) {
-                    isOnline = true;
                     badge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-800";
                     badge.innerHTML = '<span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500"></span>ஆன்லைன் - இணைக்கப்பட்டுள்ளது';
                 } else {
-                    isOnline = false;
                     badge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-100 text-rose-800";
                     badge.innerHTML = '<span class="w-1.5 h-1.5 mr-1 rounded-full bg-rose-500"></span>ஆஃப்லைன்';
                 }
             });
 
-            // Listen for Categories live updates
             db.ref(`shops/${shopKey}/categories`).on('value', (snapshot) => {
                 const val = snapshot.val();
                 if (val && Array.isArray(val) && val.length > 0) {
@@ -373,7 +406,6 @@
                 renderCategoryManageList();
             });
 
-            // Listen for Items live updates
             db.ref(`shops/${shopKey}/items`).on('value', (snapshot) => {
                 const val = snapshot.val();
                 if (val) {
@@ -389,9 +421,6 @@
             });
         }
 
-        // -------------------------------------------------------------
-        // DATE HELPER
-        // -------------------------------------------------------------
         function getCurrentFormattedDate() {
             const now = new Date();
             const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -399,9 +428,6 @@
             return `${dateStr}, ${timeStr}`;
         }
 
-        // -------------------------------------------------------------
-        // CATEGORY & UI RENDERING
-        // -------------------------------------------------------------
         function populateCategoryDropdown() {
             const select = document.getElementById('itemCategory');
             select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
@@ -410,7 +436,7 @@
         function renderCategoryChips() {
             const container = document.getElementById('categoryChips');
             let html = `
-                <button onclick="setCategoryFilter('all')" class="px-3 py-1.5 rounded-full border whitespace-nowrap font-medium transition-all ${activeCategory === 'all' ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                <button onclick="setCategoryFilter('all')" class="px-3 py-1.5 rounded-full border whitespace-nowrap font-medium transition-all ${activeCategory === 'all' ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-slate-600 border-slate-200'}">
                     எல்லா பிரிவும்
                 </button>
             `;
@@ -420,7 +446,7 @@
                 if (count > 0 || activeCategory === cat) {
                     const isActive = activeCategory === cat;
                     html += `
-                        <button onclick="setCategoryFilter('${cat}')" class="px-3 py-1.5 rounded-full border whitespace-nowrap font-medium transition-all ${isActive ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                        <button onclick="setCategoryFilter('${cat}')" class="px-3 py-1.5 rounded-full border whitespace-nowrap font-medium transition-all ${isActive ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-slate-600 border-slate-200'}">
                             ${cat} (${count})
                         </button>
                     `;
@@ -442,7 +468,7 @@
 
             if (type === 'out_of_stock') {
                 notice.classList.remove('hidden');
-                noticeText.textContent = 'காட்டப்படுகிறது: இருப்பில் இல்லாத பொருட்கள் (Out of Stock) மட்டும்';
+                noticeText.textContent = 'காட்டப்படுகிறது: இருப்பில் இல்லாத பொருட்கள் மட்டும்';
             } else if (type === 'in_stock') {
                 notice.classList.remove('hidden');
                 noticeText.textContent = 'காட்டப்படுகிறது: இருப்பில் உள்ள பொருட்கள் மட்டும்';
@@ -477,9 +503,6 @@
             renderItems();
         }
 
-        // -------------------------------------------------------------
-        // ITEM LIST RENDER LOGIC
-        // -------------------------------------------------------------
         function renderItems() {
             const listContainer = document.getElementById('itemList');
             const emptyState = document.getElementById('emptyState');
@@ -520,53 +543,86 @@
 
             emptyState.classList.add('hidden');
 
-            listContainer.innerHTML = filtered.map(item => `
-                <div class="bg-white rounded-xl p-3.5 border ${item.inStock ? 'border-slate-200' : 'border-rose-200 bg-rose-50/30'} shadow-sm relative transition-all">
-                    <div class="flex items-start justify-between gap-2 mb-1.5">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-slate-800 text-base leading-snug">${escapeHtml(item.name)}</h3>
-                                ${!item.inStock ? '<span class="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">இருப்பில் இல்லை</span>' : ''}
+            if (viewMode === 'card') {
+                // Card Layout View
+                listContainer.className = "space-y-2.5";
+                listContainer.innerHTML = filtered.map(item => `
+                    <div class="bg-white rounded-xl p-3 border ${item.inStock ? 'border-slate-200' : 'border-rose-200 bg-rose-50/20'} shadow-sm relative transition-all">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <h3 class="font-bold text-slate-800 text-sm leading-snug">${escapeHtml(item.name)}</h3>
+                                    ${!item.inStock ? '<span class="bg-rose-100 text-rose-700 text-[10px] font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap">இருப்பில் இல்லை</span>' : ''}
+                                </div>
+                                <span class="inline-block bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-md mt-1 font-medium">
+                                    ${escapeHtml(item.category)}
+                                </span>
                             </div>
-                            <span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded-md mt-1 font-medium">
-                                ${escapeHtml(item.category)}
-                            </span>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-extrabold text-emerald-700">₹${Number(item.price).toFixed(2)}</div>
-                            <div class="text-[11px] text-slate-500 font-medium">${escapeHtml(item.unit)}</div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-2 mt-2 text-[11px] text-slate-500">
-                        <div class="space-y-0.5">
-                            <div><i class="fa-regular fa-calendar-plus text-slate-400 mr-1"></i>சேர்க்கப்பட்டது: <span class="text-slate-700 font-medium">${item.createdAt}</span></div>
-                            ${item.updatedAt !== item.createdAt ? `<div><i class="fa-regular fa-pen-to-square text-slate-400 mr-1"></i>மாற்றப்பட்டது: <span class="text-slate-700 font-medium">${item.updatedAt}</span></div>` : ''}
+                            <div class="text-right">
+                                <div class="text-base font-extrabold text-emerald-700">₹${Number(item.price).toFixed(2)}</div>
+                                <div class="text-[10px] text-slate-500 font-medium">${escapeHtml(item.unit)}</div>
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="toggleStockStatus('${item.id}')" title="இருப்பு நிலையை மாற்ற" 
-                                class="p-1.5 rounded-lg border ${item.inStock ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'} font-medium text-xs flex items-center gap-1">
-                                <i class="fa-solid ${item.inStock ? 'fa-ban' : 'fa-check'}"></i>
-                                <span>${item.inStock ? 'தீர்ந்தது' : 'வந்தது'}</span>
-                            </button>
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-2 mt-2 text-[10px] text-slate-500">
+                            <div class="space-y-0.5">
+                                <div><i class="fa-regular fa-calendar-plus text-slate-400 mr-1"></i>${item.createdAt}</div>
+                            </div>
 
-                            <button onclick="openModal('edit', '${item.id}')" title="மாற்றங்கள் செய்ய" class="p-1.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="toggleStockStatus('${item.id}')" title="இருப்பு நிலையை மாற்ற" 
+                                    class="px-2 py-1 rounded-lg border ${item.inStock ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'} font-semibold text-[11px] flex items-center gap-1">
+                                    <i class="fa-solid ${item.inStock ? 'fa-ban' : 'fa-check'} text-[10px]"></i>
+                                    <span>${item.inStock ? 'தீர்ந்தது' : 'வந்தது'}</span>
+                                </button>
 
-                            <button onclick="deleteItem('${item.id}')" title="நீக்க" class="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                                <button onclick="openModal('edit', '${item.id}')" title="மாற்றங்கள் செய்ய" class="p-1.5 bg-slate-100 text-slate-700 rounded-lg active:bg-slate-200">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+
+                                <button onclick="deleteItem('${item.id}')" title="நீக்க" class="p-1.5 bg-rose-50 text-rose-600 rounded-lg active:bg-rose-100">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                // Compact List / Table View
+                listContainer.className = "space-y-1.5";
+                listContainer.innerHTML = filtered.map(item => `
+                    <div class="bg-white rounded-xl p-2.5 border ${item.inStock ? 'border-slate-200' : 'border-rose-200 bg-rose-50/30'} shadow-sm flex items-center justify-between gap-2">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="toggleStockStatus('${item.id}')" title="இருப்பு நிலை மாற்று" class="shrink-0">
+                                    <i class="fa-solid ${item.inStock ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-500'} text-base"></i>
+                                </button>
+                                <h3 class="font-bold text-slate-800 text-xs truncate ${!item.inStock ? 'line-through text-slate-400' : ''}">${escapeHtml(item.name)}</h3>
+                            </div>
+                            <div class="text-[10px] text-slate-500 truncate ml-5">
+                                ${escapeHtml(item.category)} • ${escapeHtml(item.unit)}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="text-right">
+                                <div class="text-sm font-bold text-emerald-700">₹${Number(item.price).toFixed(2)}</div>
+                            </div>
+
+                            <div class="flex items-center gap-1">
+                                <button onclick="openModal('edit', '${item.id}')" class="p-1.5 text-slate-500 active:bg-slate-100 rounded-lg">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="deleteItem('${item.id}')" class="p-1.5 text-rose-500 active:bg-rose-50 rounded-lg">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
-        // -------------------------------------------------------------
-        // FIREBASE REALTIME CRUD OPERATIONS
-        // -------------------------------------------------------------
         function toggleStockStatus(id) {
             const item = items.find(i => i.id === id);
             if (item) {
@@ -627,9 +683,6 @@
             }
         }
 
-        // -------------------------------------------------------------
-        // CATEGORY MANAGEMENT ACTIONS
-        // -------------------------------------------------------------
         function openCategoryModal() {
             renderCategoryManageList();
             document.getElementById('categoryModal').classList.remove('hidden');
@@ -645,16 +698,16 @@
             list.innerHTML = categories.map(cat => {
                 const itemCount = items.filter(i => i.category === cat).length;
                 return `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                    <div class="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
                         <div>
                             <span class="font-bold text-slate-800">${escapeHtml(cat)}</span>
-                            <span class="text-xs text-slate-500 ml-1">(${itemCount} பொருட்கள்)</span>
+                            <span class="text-[10px] text-slate-500 ml-1">(${itemCount})</span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="startCatEdit('${escapeHtml(cat)}')" class="p-1.5 text-slate-600 hover:bg-slate-200 rounded">
+                            <button onclick="startCatEdit('${escapeHtml(cat)}')" class="p-1.5 text-slate-600 active:bg-slate-200 rounded">
                                 <i class="fa-solid fa-pen text-xs"></i>
                             </button>
-                            <button onclick="deleteCategory('${escapeHtml(cat)}')" class="p-1.5 text-rose-600 hover:bg-rose-100 rounded">
+                            <button onclick="deleteCategory('${escapeHtml(cat)}')" class="p-1.5 text-rose-600 active:bg-rose-100 rounded">
                                 <i class="fa-solid fa-trash text-xs"></i>
                             </button>
                         </div>
@@ -711,7 +764,7 @@
         function deleteCategory(catName) {
             const count = items.filter(i => i.category === catName).length;
             if (count > 0) {
-                alert(`"${catName}" பிரிவில் ${count} பொருட்கள் உள்ளதால், இதை நீக்க முடியாது. முதலில் பொருட்களை வேறு பிரிவுக்கு மாற்றவும்.`);
+                alert(`"${catName}" பிரிவில் ${count} பொருட்கள் உள்ளதால், இதை நீக்க முடியாது.`);
                 return;
             }
 
@@ -721,9 +774,6 @@
             }
         }
 
-        // -------------------------------------------------------------
-        // MODALS CONTROL & SHOP KEY SWITCHING
-        // -------------------------------------------------------------
         function openModal(mode, id = null) {
             const modal = document.getElementById('itemModal');
             const modalTitle = document.getElementById('modalTitle');
