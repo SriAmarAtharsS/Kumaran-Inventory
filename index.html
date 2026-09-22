@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ஸ்ரீ குமரன் மளிகைக் கடை</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Mukta Malar', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.25s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-28">
+
+    <header class="bg-emerald-700 text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-400 text-emerald-950 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shadow-inner">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold leading-tight tracking-wide">ஸ்ரீ குமரன் மளிகை</h1>
+                    <p class="text-xs text-emerald-100 font-medium">சரக்கு மேலாண்மை (Inventory)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <button onclick="openCategoryManagerModal()" title="பிரிவுகளை நிர்வகிக்க" class="text-emerald-100 hover:text-white p-2 text-xs bg-emerald-800/80 hover:bg-emerald-800 rounded-lg flex items-center gap-1">
+                    <i class="fa-solid fa-tags text-amber-300"></i>
+                    <span class="hidden sm:inline font-semibold">பிரிவுகள்</span>
+                </button>
+                <button onclick="exportData()" title="தரவை பதிவிறக்க" class="text-emerald-100 hover:text-white p-2 text-xs bg-emerald-800/80 hover:bg-emerald-800 rounded-lg">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <button onclick="resetData()" title="ஆரம்ப நிலைக்கு மாற்ற" class="text-rose-200 hover:text-white p-2 text-xs bg-emerald-800/80 hover:bg-emerald-800 rounded-lg">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 pt-4">
+
+        <!-- Dashboard Summary Filter Cards -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <!-- All Items Card -->
+            <button onclick="setStockFilter('all')" id="card-filter-all" class="bg-white p-3 rounded-2xl border-2 border-emerald-500 shadow-sm text-left transition-all active:scale-95">
+                <div class="text-emerald-700 font-bold text-xs mb-1">மொத்த பொருட்கள்</div>
+                <div class="text-2xl font-black text-slate-800" id="stat-total">0</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">அனைத்தையும் பார்க்க</div>
+            </button>
+
+            <!-- Available Items Card -->
+            <button onclick="setStockFilter('in_stock')" id="card-filter-instock" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm text-left transition-all active:scale-95">
+                <div class="text-emerald-700 font-bold text-xs mb-1 flex items-center justify-between">
+                    <span>இருப்பில்</span>
+                    <i class="fa-solid fa-check-circle text-emerald-500 text-xs"></i>
+                </div>
+                <div class="text-2xl font-black text-emerald-700" id="stat-instock">0</div>
+                <div class="text-[10px] text-emerald-600 mt-0.5">உள்ளவை மட்டும்</div>
+            </button>
+
+            <!-- Out of Stock Card -->
+            <button onclick="setStockFilter('out_of_stock')" id="card-filter-outstock" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm text-left transition-all active:scale-95">
+                <div class="text-rose-600 font-bold text-xs mb-1 flex items-center justify-between">
+                    <span>இருப்பில் இல்லை</span>
+                    <i class="fa-solid fa-circle-exclamation text-rose-500 text-xs"></i>
+                </div>
+                <div class="text-2xl font-black text-rose-600" id="stat-outstock">0</div>
+                <div class="text-[10px] text-rose-500 mt-0.5">தீர்ந்தவை மட்டும்</div>
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative mb-3">
+            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="பொருளின் பெயரை அல்லது பிரிவை தேட..." 
+                class="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm text-sm">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+            <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-circle-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Stock Filter Tabs -->
+        <div class="flex bg-slate-200/80 p-1 rounded-xl mb-3 text-xs font-bold">
+            <button onclick="setStockFilter('all')" id="tab-all" class="flex-1 py-2 rounded-lg bg-white text-emerald-800 shadow-sm text-center">
+                அனைத்தும்
+            </button>
+            <button onclick="setStockFilter('in_stock')" id="tab-instock" class="flex-1 py-2 rounded-lg text-slate-600 text-center">
+                இருப்பில் உள்ளவை
+            </button>
+            <button onclick="setStockFilter('out_of_stock')" id="tab-outstock" class="flex-1 py-2 rounded-lg text-slate-600 text-center flex items-center justify-center gap-1.5">
+                <span>இருப்பில் இல்லை</span>
+                <span id="out-of-stock-badge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+            </button>
+        </div>
+
+        <!-- Dynamic Category Chips Bar -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-2 text-xs" id="categoryChips">
+            <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Active Filter Notice Banner -->
+        <div id="filterNotice" class="hidden mb-3 bg-amber-50 border border-amber-200 text-amber-900 px-3 py-2 rounded-xl text-xs flex items-center justify-between shadow-sm">
+            <span id="filterNoticeText" class="font-medium">காட்டப்படுகிறது: இருப்பில் இல்லாத பொருட்கள் மட்டும்</span>
+            <button onclick="setStockFilter('all')" class="underline font-bold text-amber-950 ml-2">அனைத்தையும் காட்டு</button>
+        </div>
+
+        <!-- Item List Container -->
+        <div id="itemList" class="space-y-2.5">
+            <!-- Items rendered via JS -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="emptyState" class="hidden py-12 text-center bg-white rounded-2xl border border-dashed border-slate-300 p-6 mt-2">
+            <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl border border-emerald-100">
+                <i class="fa-solid fa-basket-shopping"></i>
+            </div>
+            <p class="text-slate-700 font-bold" id="emptyStateMessage">பொருட்கள் எதுவும் கிடைக்கவில்லை!</p>
+            <p class="text-slate-400 text-xs mt-1">புதிய பொருளை சேர்க்க கீழே உள்ள '+' பொத்தானை அழுத்தவும்.</p>
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-5 right-5 z-20 flex flex-col gap-2 items-end">
+        <button onclick="openCategoryManagerModal()" title="பிரிவு சேர் / மாற்று" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-3 py-2 rounded-full shadow-md flex items-center gap-1.5 text-xs border border-amber-300 active:scale-95 transition-transform">
+            <i class="fa-solid fa-tags"></i>
+            <span>பிரிவு நிர்வகிப்பு</span>
+        </button>
+        <button onclick="openItemModal('add')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center active:scale-90 transition-transform">
+            <i class="fa-solid fa-plus text-2xl"></i>
+        </button>
+    </div>
+
+    <div id="itemModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h2 id="modalTitle" class="text-lg font-bold text-slate-800">புதிய பொருள் சேர்க்க</h2>
+                <button onclick="closeItemModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="itemForm" onsubmit="handleItemFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="itemId">
+
+                <!-- Item Name -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">பொருளின் பெயர் (Item Name) *</label>
+                    <input type="text" id="itemName" required placeholder="எ.கா. பொன்னி அரிசி" 
+                        class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <!-- Dynamic Category Selection -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700">பிரிவு (Category) *</label>
+                        <button type="button" onclick="openCategoryManagerModal()" class="text-xs text-emerald-700 hover:underline font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>புதிய பிரிவு உருவாக்க</span>
+                        </button>
+                    </div>
+                    <select id="itemCategory" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <!-- Filled via JS -->
+                    </select>
+                </div>
+
+                <!-- Price and Unit -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">விலை (Price ₹) *</label>
+                        <input type="number" step="0.01" min="0" id="itemPrice" required placeholder="0.00" 
+                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">அளவு அலகு (Unit) *</label>
+                        <select id="itemUnit" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="1 கி.கி (1 kg)">1 கி.கி (1 kg)</option>
+                            <option value="500 கிராம் (500g)">500 கிராம் (500g)</option>
+                            <option value="250 கிராம் (250g)">250 கிராம் (250g)</option>
+                            <option value="100 கிராம் (100g)">100 கிராம் (100g)</option>
+                            <option value="1 லிட்டர் (1 L)">1 லிட்டர் (1 L)</option>
+                            <option value="500 மி.லி (500 ml)">500 மி.லி (500 ml)</option>
+                            <option value="1 பாக்கெட் (1 Pkt)">1 பாக்கெட் (1 Pkt)</option>
+                            <option value="1 டஜன் (1 Dozen)">1 டஜன் (1 Dozen)</option>
+                            <option value="1 பீஸ் (1 Piece)">1 பீஸ் (1 Piece)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Stock Availability Switch -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-bold text-slate-800">இருப்பு நிலை (Stock Status)</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="itemInStock" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        </div>
+                    </label>
+                    <p class="text-[11px] text-slate-500 mt-1 font-medium" id="stockStatusHelpText">தற்போது விற்பனைக்கு உள்ளது</p>
+                </div>
+
+                <!-- Modal Action Buttons -->
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeItemModal()" class="flex-1 py-3 border border-slate-300 rounded-xl text-slate-600 font-bold text-sm hover:bg-slate-50">
+                        ரத்து
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-md">
+                        சேமிக்கவும்
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl max-h-[85vh] flex flex-col animate-slide-up">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-800">பிரிவுகள் நிர்வகிப்பு</h2>
+                    <p class="text-xs text-slate-500">பிரிவுகளை சேர்க்க, மாற்ற அல்லது நீக்கலாம்</p>
+                </div>
+                <button onclick="closeCategoryManagerModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Add/Edit Category Input Box -->
+            <form id="categoryForm" onsubmit="handleCategorySubmit(event)" class="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <input type="hidden" id="editCategoryId">
+                <label class="block text-xs font-bold text-slate-700 mb-1" id="categoryFormLabel">புதிய பிரிவு சேர்க்க:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="categoryNameInput" required placeholder="எ.கா. தின்பண்டங்கள்" 
+                        class="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                    <button type="submit" id="categorySubmitBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 shadow">
+                        சேர்
+                    </button>
+                    <button type="button" id="cancelCategoryEditBtn" onclick="resetCategoryForm()" class="hidden bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold">
+                        ரத்து
+                    </button>
+                </div>
+            </form>
+
+            <!-- Category List Header -->
+            <div class="text-xs font-bold text-slate-500 mb-2 px-1">தற்போதுள்ள பிரிவுகள்:</div>
+
+            <!-- Existing Categories List Scrollable Container -->
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1" id="categoryManagerList">
+                <!-- Category Rows Rendered via JS -->
+            </div>
+
+            <div class="border-t border-slate-100 pt-3 mt-3 text-right">
+                <button onclick="closeCategoryManagerModal()" class="w-full py-2.5 bg-slate-800 text-white rounded-xl text-xs font-bold">
+                    முடிந்தது
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial Default Categories
+        const INITIAL_CATEGORIES = [
+            'தானியங்கள் & அரிசி',
+            'பருப்பு வகைகள்',
+            'மசாலா & பொடிகள்',
+            'எண்ணெய் & நெய்',
+            'சர்க்கரை & வெல்லம்',
+            'தின்பண்டங்கள் & பிஸ்கட்',
+            'சோப்பு & டிடர்ஜென்ட்',
+            'பால் & டைரி',
+            'மற்றவை'
+        ];
+
+        // Sample initial grocery items
+        const INITIAL_ITEMS = [
+            {
+                id: '1',
+                name: 'பொன்னி அரிசி (Ponni Rice)',
+                category: 'தானியங்கள் & அரிசி',
+                price: 58.00,
+                unit: '1 கி.கி (1 kg)',
+                inStock: true,
+                createdAt: '21/09/2026, 09:30 AM',
+                updatedAt: '21/09/2026, 09:30 AM'
+            },
+            {
+                id: '2',
+                name: 'துவரம் பருப்பு (Toor Dal)',
+                category: 'பருப்பு வகைகள்',
+                price: 150.00,
+                unit: '1 கி.கி (1 kg)',
+                inStock: true,
+                createdAt: '21/09/2026, 10:00 AM',
+                updatedAt: '21/09/2026, 10:00 AM'
+            },
+            {
+                id: '3',
+                name: 'நல்லெண்ணெய் (Sesame Oil)',
+                category: 'எண்ணெய் & நெய்',
+                price: 240.00,
+                unit: '1 லிட்டர் (1 L)',
+                inStock: false,
+                createdAt: '20/09/2026, 04:15 PM',
+                updatedAt: '22/09/2026, 08:00 AM'
+            },
+            {
+                id: '4',
+                name: 'ஆச்சி மிளகாய்த்தூள் (Chilli Powder)',
+                category: 'மசாலா & பொடிகள்',
+                price: 35.00,
+                unit: '100 கிராம் (100g)',
+                inStock: true,
+                createdAt: '21/09/2026, 11:20 AM',
+                updatedAt: '21/09/2026, 11:20 AM'
+            },
+            {
+                id: '5',
+                name: 'வெள்ளை சர்க்கரை (Sugar)',
+                category: 'சர்க்கரை & வெல்லம்',
+                price: 42.00,
+                unit: '1 கி.கி (1 kg)',
+                inStock: false,
+                createdAt: '19/09/2026, 02:00 PM',
+                updatedAt: '22/09/2026, 10:15 AM'
+            }
+        ];
+
+        // Global Application State
+        let categories = [];
+        let items = [];
+        let activeCategory = 'all';
+        let stockFilter = 'all';
+        let searchQuery = '';
+
+        // App Initializer
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadItems();
+            populateCategoryDropdown();
+            renderCategoryChips();
+            renderItems();
+
+            document.getElementById('itemInStock').addEventListener('change', (e) => {
+                const helpText = document.getElementById('stockStatusHelpText');
+                helpText.textContent = e.target.checked ? 'தற்போது விற்பனைக்கு உள்ளது' : 'இருப்பில் இல்லை (Out of stock)';
+            });
+        });
+
+        function loadCategories() {
+            const stored = localStorage.getItem('sri_kumaran_categories');
+            if (stored) {
+                try {
+                    categories = JSON.parse(stored);
+                } catch (e) {
+                    categories = [...INITIAL_CATEGORIES];
+                }
+            } else {
+                categories = [...INITIAL_CATEGORIES];
+                saveCategories();
+            }
+        }
+
+        function saveCategories() {
+            localStorage.setItem('sri_kumaran_categories', JSON.stringify(categories));
+        }
+
+        function loadItems() {
+            const stored = localStorage.getItem('sri_kumaran_items');
+            if (stored) {
+                try {
+                    items = JSON.parse(stored);
+                } catch (e) {
+                    items = [...INITIAL_ITEMS];
+                }
+            } else {
+                items = [...INITIAL_ITEMS];
+                saveItems();
+            }
+        }
+
+        function saveItems() {
+            localStorage.setItem('sri_kumaran_items', JSON.stringify(items));
+        }
+
+        function getCurrentFormattedDate() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            const timeStr = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            return `${dateStr}, ${timeStr}`;
+        }
+
+        function populateCategoryDropdown() {
+            const select = document.getElementById('itemCategory');
+            select.innerHTML = categories.map(cat => 
+                `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`
+            ).join('');
+        }
+
+        function renderCategoryChips() {
+            const container = document.getElementById('categoryChips');
+            let html = `
+                <button onclick="setCategoryFilter('all')" class="px-3.5 py-1.5 rounded-full border whitespace-nowrap font-bold transition-all ${activeCategory === 'all' ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                    எல்லா பிரிவும்
+                </button>
+            `;
+
+            categories.forEach(cat => {
+                const count = items.filter(i => i.category === cat).length;
+                const isActive = activeCategory === cat;
+                html += `
+                    <button onclick="setCategoryFilter('${escapeHtml(cat)}')" class="px-3.5 py-1.5 rounded-full border whitespace-nowrap font-bold transition-all ${isActive ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                        ${escapeHtml(cat)} (${count})
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function openCategoryManagerModal() {
+            renderCategoryManagerList();
+            resetCategoryForm();
+            document.getElementById('categoryModal').classList.remove('hidden');
+        }
+
+        function closeCategoryManagerModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+        }
+
+        function renderCategoryManagerList() {
+            const list = document.getElementById('categoryManagerList');
+            if (categories.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">பிரிவுகள் எதுவும் இல்லை. புதிய ஒன்றை சேர்க்கவும்.</p>`;
+                return;
+            }
+
+            list.innerHTML = categories.map((cat, index) => {
+                const itemUsageCount = items.filter(i => i.category === cat).length;
+                return `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div>
+                            <span class="font-bold text-slate-800 text-sm block">${escapeHtml(cat)}</span>
+                            <span class="text-[10px] text-slate-500 font-medium">${itemUsageCount} பொருட்கள் இந்த பிரிவில் உள்ளன</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="editCategoryName(${index})" title="பிரிவை மாற்ற" class="p-1.5 bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-semibold">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteCategory(${index})" title="பிரிவை நீக்க" class="p-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg hover:bg-rose-100 text-xs font-semibold">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleCategorySubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('categoryNameInput');
+            const newCatName = input.value.trim();
+            const editIndex = document.getElementById('editCategoryId').value;
+
+            if (!newCatName) return;
+
+            if (editIndex !== "") {
+                // Editing existing Category
+                const oldCatName = categories[editIndex];
+                if (oldCatName !== newCatName) {
+                    categories[editIndex] = newCatName;
+                    // Update category name for all existing items using it
+                    items.forEach(item => {
+                        if (item.category === oldCatName) {
+                            item.category = newCatName;
+                        }
+                    });
+                    saveItems();
+                }
+            } else {
+                // Adding new Category
+                if (categories.includes(newCatName)) {
+                    alert('இந்த பிரிவு ஏற்கனவே உள்ளது!');
+                    return;
+                }
+                categories.push(newCatName);
+            }
+
+            saveCategories();
+            populateCategoryDropdown();
+            renderCategoryChips();
+            renderCategoryManagerList();
+            renderItems();
+            resetCategoryForm();
+        }
+
+        function editCategoryName(index) {
+            const catName = categories[index];
+            document.getElementById('editCategoryId').value = index;
+            document.getElementById('categoryNameInput').value = catName;
+            document.getElementById('categoryFormLabel').textContent = 'பிரிவை மாற்றியமைக்கவும்:';
+            document.getElementById('categorySubmitBtn').textContent = 'மாற்று';
+            document.getElementById('cancelCategoryEditBtn').classList.remove('hidden');
+        }
+
+        function resetCategoryForm() {
+            document.getElementById('editCategoryId').value = '';
+            document.getElementById('categoryNameInput').value = '';
+            document.getElementById('categoryFormLabel').textContent = 'புதிய பிரிவு சேர்க்க:';
+            document.getElementById('categorySubmitBtn').textContent = 'சேர்';
+            document.getElementById('cancelCategoryEditBtn').classList.add('hidden');
+        }
+
+        function deleteCategory(index) {
+            const catName = categories[index];
+            const usageCount = items.filter(i => i.category === catName).length;
+
+            let warningMsg = `"${catName}" பிரிவை நிச்சயமாக நீக்க வேண்டுமா?`;
+            if (usageCount > 0) {
+                warningMsg = `"${catName}" பிரிவில் ${usageCount} பொருட்கள் உள்ளன! இந்த பிரிவை நீக்கினால் அந்த பொருட்கள் 'மற்றவை' பிரிவுக்கு மாற்றப்படும். நீக்கலாமா?`;
+            }
+
+            if (confirm(warningMsg)) {
+                // Remove Category
+                categories.splice(index, 1);
+
+                // Re-assign orphaned items to 'மற்றவை'
+                if (usageCount > 0) {
+                    if (!categories.includes('மற்றவை')) {
+                        categories.push('மற்றவை');
+                    }
+                    items.forEach(item => {
+                        if (item.category === catName) {
+                            item.category = 'மற்றவை';
+                        }
+                    });
+                    saveItems();
+                }
+
+                if (activeCategory === catName) {
+                    activeCategory = 'all';
+                }
+
+                saveCategories();
+                populateCategoryDropdown();
+                renderCategoryChips();
+                renderCategoryManagerList();
+                renderItems();
+            }
+        }
+
+        function setStockFilter(type) {
+            stockFilter = type;
+
+            document.getElementById('tab-all').className = `flex-1 py-2 rounded-lg text-center font-bold ${type === 'all' ? 'bg-white text-emerald-800 shadow-sm' : 'text-slate-600'}`;
+            document.getElementById('tab-instock').className = `flex-1 py-2 rounded-lg text-center font-bold ${type === 'in_stock' ? 'bg-white text-emerald-800 shadow-sm' : 'text-slate-600'}`;
+            document.getElementById('tab-outstock').className = `flex-1 py-2 rounded-lg text-center font-bold flex items-center justify-center gap-1.5 ${type === 'out_of_stock' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-600'}`;
+
+            document.getElementById('card-filter-all').className = `bg-white p-3 rounded-2xl border-2 ${type === 'all' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200'} shadow-sm text-left transition-all active:scale-95`;
+            document.getElementById('card-filter-instock').className = `bg-white p-3 rounded-2xl border-2 ${type === 'in_stock' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200'} shadow-sm text-left transition-all active:scale-95`;
+            document.getElementById('card-filter-outstock').className = `bg-white p-3 rounded-2xl border-2 ${type === 'out_of_stock' ? 'border-rose-500 ring-2 ring-rose-100' : 'border-slate-200'} shadow-sm text-left transition-all active:scale-95`;
+
+            const notice = document.getElementById('filterNotice');
+            const noticeText = document.getElementById('filterNoticeText');
+
+            if (type === 'out_of_stock') {
+                notice.classList.remove('hidden');
+                noticeText.textContent = 'காட்டப்படுகிறது: இருப்பில் இல்லாத பொருட்கள் (Out of Stock) மட்டும்';
+            } else if (type === 'in_stock') {
+                notice.classList.remove('hidden');
+                noticeText.textContent = 'காட்டப்படுகிறது: இருப்பில் உள்ள பொருட்கள் மட்டும்';
+            } else {
+                notice.classList.add('hidden');
+            }
+
+            renderItems();
+        }
+
+        function setCategoryFilter(category) {
+            activeCategory = category;
+            renderCategoryChips();
+            renderItems();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+            const clearBtn = document.getElementById('clearSearch');
+            if (searchQuery.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderItems();
+        }
+
+        function clearSearchInput() {
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            renderItems();
+        }
+
+        function renderItems() {
+            const listContainer = document.getElementById('itemList');
+            const emptyState = document.getElementById('emptyState');
+
+            const totalCount = items.length;
+            const inStockCount = items.filter(i => i.inStock).length;
+            const outOfStockCount = items.filter(i => !i.inStock).length;
+
+            document.getElementById('stat-total').textContent = totalCount;
+            document.getElementById('stat-instock').textContent = inStockCount;
+            document.getElementById('stat-outstock').textContent = outOfStockCount;
+
+            const badge = document.getElementById('out-of-stock-badge');
+            if (outOfStockCount > 0) {
+                badge.textContent = outOfStockCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            let filtered = items.filter(item => {
+                if (stockFilter === 'in_stock' && !item.inStock) return false;
+                if (stockFilter === 'out_of_stock' && item.inStock) return false;
+                if (activeCategory !== 'all' && item.category !== activeCategory) return false;
+                if (searchQuery) {
+                    const nameMatch = item.name.toLowerCase().includes(searchQuery);
+                    const catMatch = item.category.toLowerCase().includes(searchQuery);
+                    return nameMatch || catMatch;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                const emptyMsg = document.getElementById('emptyStateMessage');
+                if (stockFilter === 'out_of_stock') {
+                    emptyMsg.textContent = 'இருப்பில் இல்லாத பொருட்கள் எதுவும் இல்லை!';
+                } else if (searchQuery) {
+                    emptyMsg.textContent = `"${searchQuery}" என்ற பெயரில் பொருள் இல்லை!`;
+                } else {
+                    emptyMsg.textContent = 'பொருட்கள் எதுவும் இல்லை!';
+                }
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            listContainer.innerHTML = filtered.map(item => `
+                <div class="bg-white rounded-2xl p-3.5 border ${item.inStock ? 'border-slate-200' : 'border-rose-200 bg-rose-50/20'} shadow-sm relative transition-all">
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-extrabold text-slate-800 text-base leading-snug">${escapeHtml(item.name)}</h3>
+                                ${!item.inStock ? '<span class="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full whitespace-nowrap">இருப்பில் இல்லை</span>' : ''}
+                            </div>
+                            <span class="inline-block bg-slate-100 text-slate-600 text-[11px] px-2.5 py-0.5 rounded-lg mt-1 font-bold">
+                                <i class="fa-solid fa-tag text-[9px] mr-1 text-slate-400"></i>${escapeHtml(item.category)}
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-black text-emerald-700">₹${Number(item.price).toFixed(2)}</div>
+                            <div class="text-[11px] text-slate-500 font-bold">${escapeHtml(item.unit)}</div>
+                        </div>
+                    </div>
+
+                    <!-- Date & Action Controls -->
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2.5 text-[11px] text-slate-500">
+                        <div class="space-y-0.5">
+                            <div><i class="fa-regular fa-calendar-plus text-slate-400 mr-1"></i>சேர்க்கப்பட்டது: <span class="text-slate-700 font-semibold">${item.createdAt}</span></div>
+                            ${item.updatedAt !== item.createdAt ? `<div><i class="fa-regular fa-pen-to-square text-slate-400 mr-1"></i>மாற்றப்பட்டது: <span class="text-slate-700 font-semibold">${item.updatedAt}</span></div>` : ''}
+                        </div>
+
+                        <div class="flex items-center gap-1.5">
+                            <!-- Quick Stock Toggle Button -->
+                            <button onclick="toggleStockStatus('${item.id}')" title="இருப்பு நிலையை மாற்ற" 
+                                class="p-1.5 px-2 rounded-lg border ${item.inStock ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-emerald-200 bg-emerald-50 text-emerald-800'} font-bold text-xs flex items-center gap-1">
+                                <i class="fa-solid ${item.inStock ? 'fa-ban' : 'fa-check'}"></i>
+                                <span>${item.inStock ? 'தீர்ந்தது' : 'வந்தது'}</span>
+                            </button>
+
+                            <!-- Edit Button -->
+                            <button onclick="openItemModal('edit', '${item.id}')" title="மாற்றங்கள் செய்ய" class="p-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button onclick="deleteItem('${item.id}')" title="நீக்க" class="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleStockStatus(id) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.inStock = !item.inStock;
+                item.updatedAt = getCurrentFormattedDate();
+                saveItems();
+                renderCategoryChips();
+                renderItems();
+            }
+        }
+
+        function openItemModal(mode, id = null) {
+            populateCategoryDropdown();
+            const modal = document.getElementById('itemModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('itemForm');
+
+            form.reset();
+
+            if (mode === 'add') {
+                modalTitle.textContent = 'புதிய பொருள் சேர்க்க';
+                document.getElementById('itemId').value = '';
+                document.getElementById('itemInStock').checked = true;
+                document.getElementById('stockStatusHelpText').textContent = 'தற்போது விற்பனைக்கு உள்ளது';
+            } else if (mode === 'edit' && id) {
+                const item = items.find(i => i.id === id);
+                if (!item) return;
+
+                modalTitle.textContent = 'பொருளின் தகவலை மாற்ற';
+                document.getElementById('itemId').value = item.id;
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemCategory').value = item.category;
+                document.getElementById('itemPrice').value = item.price;
+                document.getElementById('itemUnit').value = item.unit;
+                document.getElementById('itemInStock').checked = item.inStock;
+                document.getElementById('stockStatusHelpText').textContent = item.inStock ? 'தற்போது விற்பனைக்கு உள்ளது' : 'இருப்பில் இல்லை (Out of stock)';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.add('hidden');
+        }
+
+        function handleItemFormSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('itemId').value;
+            const name = document.getElementById('itemName').value.trim();
+            const category = document.getElementById('itemCategory').value;
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const unit = document.getElementById('itemUnit').value;
+            const inStock = document.getElementById('itemInStock').checked;
+
+            const now = getCurrentFormattedDate();
+
+            if (id) {
+                const index = items.findIndex(i => i.id === id);
+                if (index !== -1) {
+                    items[index] = {
+                        ...items[index],
+                        name,
+                        category,
+                        price,
+                        unit,
+                        inStock,
+                        updatedAt: now
+                    };
+                }
+            } else {
+                const newItem = {
+                    id: Date.now().toString(),
+                    name,
+                    category,
+                    price,
+                    unit,
+                    inStock,
+                    createdAt: now,
+                    updatedAt: now
+                };
+                items.unshift(newItem);
+            }
+
+            saveItems();
+            renderCategoryChips();
+            renderItems();
+            closeItemModal();
+        }
+
+        function deleteItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            if (confirm(`"${item.name}" பொருளை நிச்சயமாக நீக்க வேண்டுமா?`)) {
+                items = items.filter(i => i.id !== id);
+                saveItems();
+                renderCategoryChips();
+                renderItems();
+            }
+        }
+
+        function resetData() {
+            if (confirm('அனைத்து தரவுகளையும் நீக்கி ஆரம்ப நிலைக்கு மாற்ற வேண்டுமா?')) {
+                localStorage.removeItem('sri_kumaran_items');
+                localStorage.removeItem('sri_kumaran_categories');
+                categories = [...INITIAL_CATEGORIES];
+                items = [...INITIAL_ITEMS];
+                saveCategories();
+                saveItems();
+                populateCategoryDropdown();
+                renderCategoryChips();
+                renderItems();
+            }
+        }
+
+        function exportData() {
+            const exportPayload = {
+                storeName: 'ஸ்ரீ குமரன் மளிகைக் கடை',
+                exportedAt: getCurrentFormattedDate(),
+                categories: categories,
+                items: items
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `sri_kumaran_maligai_backup_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+    </script>
+</body>
+</html>
